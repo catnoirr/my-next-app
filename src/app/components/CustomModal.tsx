@@ -4,10 +4,11 @@ import React from "react";
 interface CustomModalProps {
   isOpen: boolean;
   onClose: () => void;
+  title?: string; // Add title here, making it optional if needed
   children: React.ReactNode;
 }
 
-const CustomModal: React.FC<CustomModalProps> = ({ isOpen, onClose, children }) => {
+const CustomModal: React.FC<CustomModalProps> = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
 
   return (
@@ -20,7 +21,7 @@ const CustomModal: React.FC<CustomModalProps> = ({ isOpen, onClose, children }) 
 
       {/* Modal content */}
       <div
-        className="relative bg-white p-8 rounded-lg shadow-lg w-full max-w-lg z-10 transform transition-transform duration-300 ease-out scale-90 opacity-0 animate-modal-open"
+        className="relative bg-white p-8 rounded-lg shadow-lg w-full max-w-sm md:max-w-2xl z-10 transform transition-transform duration-300 ease-out scale-90 opacity-0 animate-modal-open"
       >
         <button
           onClick={onClose}
@@ -28,6 +29,10 @@ const CustomModal: React.FC<CustomModalProps> = ({ isOpen, onClose, children }) 
         >
           &times;
         </button>
+
+        {/* Title */}
+        {title && <h2 className="text-xl font-semibold mb-4">{title}</h2>}
+
         {children}
       </div>
 

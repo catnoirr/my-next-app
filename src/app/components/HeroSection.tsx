@@ -6,25 +6,24 @@ const HeroSection: React.FC = () => {
       {/* Navbar */}
       <header className="flex justify-between items-center px-8 py-4 border-b border-gray-200">
         <div className="flex items-center space-x-4">
-          <button className="text-gray-500 text-2xl font-bold">&#9776;</button>
           <div className="relative">
-            <input
+            {/* <input
               type="text"
               placeholder="Search"
               className="px-4 py-2 bg-gray-100 rounded-full text-gray-700 focus:outline-none"
-            />
-            <FaSearch className="absolute top-2 right-4 text-gray-500" />
+            /> */}
+            {/* <FaSearch className="absolute top-2 right-4 text-gray-500" /> */}
           </div>
         </div>
-        <div className="flex items-center space-x-4">
+        {/* <div className="flex items-center space-x-4">
           <FaBell className="text-gray-500" />
           <FaUserCircle className="text-gray-500" />
-        </div>
+        </div> */}
       </header>
 
       {/* Hero Section */}
       <div className="bg-purple-600 text-white p-8 h-52 rounded-2xl shadow-md">
-        <h1 className="text-3xl font-bold">Projects</h1>
+        <h1 className="text-3xl font-bold">Activities</h1>
       </div>
 
       {/* Project Stats */}

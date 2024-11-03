@@ -19,3 +19,75 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+/* Thin scrollbar */
+.thin-scrollbar::-webkit-scrollbar {
+  width: 2px; /* Adjust width to make it thinner */
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Track background color */
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #c1c1c1; /* Scrollbar thumb color */
+  border-radius: 30px; /* Rounded edges for thumb */
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #812121; /* Color on hover */
+}
+
+.thin-scrollbar {
+  scrollbar-width: thin; /* Firefox support for thin scrollbar */
+  scrollbar-color: #c1c1c1 #f1f1f1; /* Firefox color */
+}
+/* Hide scrollbar initially */
+.scroll-container {
+  overflow-y: auto;
+  max-height: 24rem; /* Adjust height as needed */
+}
+
+.scroll-container::-webkit-scrollbar {
+  width: 0; /* Hide scrollbar initially */
+}
+
+.scroll-container:hover::-webkit-scrollbar {
+  width: 2px; /* Show scrollbar on hover with a thin width */
+}
+
+.scroll-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  background-color: #c1c1c1;
+  border-radius: 10px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background-color: #a1a1a1;
+}
+
+/* Firefox support */
+.scroll-container {
+  scrollbar-width: none; /* Hide scrollbar in Firefox */
+}
+
+.scroll-container:hover {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+@keyframes lightning {
+  0%, 100% {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    border-color: rgba(255, 255, 255, 1);
+  }
+}
+
+.border-lightning {
+  animation: lightning 1s ease-in-out infinite;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+}

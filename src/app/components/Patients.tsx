@@ -21,6 +21,7 @@ interface Volunteer {
   email: string;
   verified: boolean;
   location?: string;
+  requestedUsers?: string[];
 }
 
 interface PatientsProps {
@@ -46,7 +47,6 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
           id: doc.id,
           ...doc.data(),
         })) as Patient[];
-
         setPatients(patientData);
       },
       (error) => {
@@ -61,9 +61,7 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
           id: doc.id,
           ...doc.data(),
         })) as Volunteer[];
-
-        const verifiedVolunteers = volunteerData.filter(volunteer => volunteer.verified);
-        setVolunteers(verifiedVolunteers);
+        setVolunteers(volunteerData.filter(volunteer => volunteer.verified));
       },
       (error) => {
         console.error("Error fetching volunteers:", error);
@@ -98,14 +96,24 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
     if (selectedPatient) {
       try {
         const patientRef = doc(db, "requests", selectedPatient.id);
+        const updatedStatus = "Assigned";
+        const updatedVolunteers = [...(selectedPatient.assignedVolunteers || []), volunteer.id];
+
+        // Update patient status and assigned volunteers
         await updateDoc(patientRef, {
-          status: "Assigned",
-          assignedVolunteers: [...(selectedPatient.assignedVolunteers || []), volunteer.id],
+          status: updatedStatus,
+          assignedVolunteers: updatedVolunteers,
+        });
+
+        // Update the volunteer's requestedUsers field
+        const volunteerRef = doc(db, "volunteers", volunteer.id);
+        await updateDoc(volunteerRef, {
+          requestedUsers: [...(volunteer.requestedUsers || []), selectedPatient.id],
         });
 
         setPatients((prevPatients) =>
           prevPatients.map((p) =>
-            p.id === selectedPatient.id ? { ...p, status: "Assigned", assignedVolunteers: [...(p.assignedVolunteers || []), volunteer.id] } : p
+            p.id === selectedPatient.id ? { ...p, status: updatedStatus, assignedVolunteers: updatedVolunteers } : p
           )
         );
         closeVolunteerModal();
@@ -208,7 +216,7 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
                       </span>
                     </td>
                     <td className="py-2 px-4 border-b">
-                      <div className="flex space-x-3">
+                      <div className="flex space-x-2">
                         <button onClick={() => openPatientModal(patient)} title="View Details">
                           <FaEye className="text-gray-500 hover:text-gray-700" />
                         </button>
@@ -224,8 +232,8 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
           )}
         </div>
 
-        {/* Pagination */}
-        <div className="flex justify-between mt-4">
+        {/* Pagination Controls */}
+        <div className="flex justify-between items-center mt-4">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
@@ -233,7 +241,9 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
           >
             <FaChevronLeft />
           </button>
-          <span className="text-gray-600">Page {currentPage} of {totalPages}</span>
+          <div>
+            Page {currentPage} of {totalPages}
+          </div>
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
@@ -245,49 +255,49 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
       </div>
 
       {/* Patient Modal */}
-      <CustomModal isOpen={isPatientModalOpen} onClose={closePatientModal}>
-        {selectedPatient && (
-          <div>
-            <h2 className="text-xl font-semibold mb-3">{selectedPatient.name}</h2>
-            <p><strong>Email:</strong> {selectedPatient.email}</p>
-            <p><strong>Phone:</strong> {selectedPatient.phone}</p>
-            <p><strong>Details:</strong> {selectedPatient.details}</p>
+      {selectedPatient && (
+        <CustomModal isOpen={isPatientModalOpen} onClose={closePatientModal}>
+          <h3 className="text-xl font-bold mb-4">Patient Details</h3>
+          <p><strong>Name:</strong> {selectedPatient.name}</p>
+          <p><strong>Email:</strong> {selectedPatient.email}</p>
+          <p><strong>Phone:</strong> {selectedPatient.phone}</p>
+          <p><strong>Status:</strong> {selectedPatient.status}</p>
+          <div className="mt-4">
             {selectedPatient.status === "Pending" ? (
-              <button
-                onClick={openVolunteerModal}
-                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
+              <button onClick={openVolunteerModal} className="bg-blue-500 text-white px-4 py-2 rounded">
                 Assign Volunteers
               </button>
             ) : (
-              <button
-                onClick={openVolunteerModal}
-                className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-              >
+              <button onClick={openVolunteerModal} className="bg-blue-500 text-white px-4 py-2 rounded">
                 View Volunteers
               </button>
             )}
           </div>
-        )}
-      </CustomModal>
+        </CustomModal>
+      )}
 
       {/* Volunteer Modal */}
-      <CustomModal isOpen={isVolunteerModalOpen} onClose={closeVolunteerModal}>
-        <h2 className="text-xl font-semibold mb-4">Assign Volunteer</h2>
-        <ul>
-          {volunteers.map((volunteer, index) => (
-            <li
-              key={`${volunteer.id}-${index}`}
-              className="flex justify-between items-center border p-3 rounded-md hover:bg-gray-100 transition cursor-pointer"
-              onClick={() => assignVolunteerToPatient(volunteer)}
-            >
-              <span>
-                {volunteer.name} - {volunteer.email} ({volunteer.location})
-              </span>
-            </li>
-          ))}
-        </ul>
-      </CustomModal>
+      {isVolunteerModalOpen && (
+        <CustomModal isOpen={isVolunteerModalOpen} onClose={closeVolunteerModal}>
+          <h3 className="text-xl font-bold mb-4">{selectedPatient?.status === "Pending" ? "Assign Volunteers" : "Assigned Volunteers"}</h3>
+          <ul className="space-y-3">
+            {(selectedPatient?.status === "Pending" ? volunteers : volunteers.filter(v => selectedPatient?.assignedVolunteers?.includes(v.id)))
+              .map((volunteer) => (
+                <li key={volunteer.id} className="flex justify-between items-center border p-2 rounded">
+                  <span>{volunteer.name} ({volunteer.location})</span>
+                  {selectedPatient?.status === "Pending" && (
+                    <button
+                      onClick={() => assignVolunteerToPatient(volunteer)}
+                      className="bg-green-500 text-white px-2 rounded"
+                    >
+                      Assign
+                    </button>
+                  )}
+                </li>
+            ))}
+          </ul>
+        </CustomModal>
+      )}
     </div>
   );
 };

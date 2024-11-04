@@ -12,14 +12,15 @@ interface Patient {
   phone: string;
   details: string;
   status?: string;
-  assignedVolunteers?: string[]; // Add assignedVolunteers field
+  assignedVolunteers?: string[];
 }
 
 interface Volunteer {
   id: string;
   name: string;
   email: string;
-  verified: boolean; // Add verified property
+  verified: boolean;
+  location?: string;
 }
 
 interface PatientsProps {
@@ -53,7 +54,6 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
       }
     );
 
-    // Fetch volunteers
     const unsubscribeVolunteers = onSnapshot(
       collection(db, "volunteers"),
       (snapshot) => {
@@ -62,7 +62,6 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
           ...doc.data(),
         })) as Volunteer[];
 
-        // Filter to get only verified volunteers
         const verifiedVolunteers = volunteerData.filter(volunteer => volunteer.verified);
         setVolunteers(verifiedVolunteers);
       },
@@ -101,7 +100,7 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
         const patientRef = doc(db, "requests", selectedPatient.id);
         await updateDoc(patientRef, {
           status: "Assigned",
-          assignedVolunteers: [...(selectedPatient.assignedVolunteers || []), volunteer.id], // Save volunteer UID
+          assignedVolunteers: [...(selectedPatient.assignedVolunteers || []), volunteer.id],
         });
 
         setPatients((prevPatients) =>
@@ -150,9 +149,9 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
         <div className="max-h-[75vh] overflow-auto">
           {isGridView ? (
             <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6 pt-0">
-              {currentPatients.map((patient) => (
+              {currentPatients.map((patient, index) => (
                 <div
-                  key={patient.id}
+                  key={`${patient.id}-${index}`}
                   className="bg-white p-5 rounded-lg shadow-sm hover:shadow-md transition duration-200 border"
                 >
                   <h3 className="text-lg font-semibold text-gray-800 mb-1">{patient.name}</h3>
@@ -163,9 +162,7 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
                       className={`inline-block mt-3 text-xs font-medium px-3 py-1 rounded-full ${
                         patient.status === "Assigned"
                           ? "bg-green-100 text-green-600"
-                          : patient.status === "Pending"
-                          ? "bg-red-100 text-red-600"
-                          : "bg-gray-100 text-gray-600"
+                          : "bg-red-100 text-red-600"
                       }`}
                     >
                       {patient.status}
@@ -194,8 +191,8 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
                 </tr>
               </thead>
               <tbody>
-                {currentPatients.map((patient) => (
-                  <tr key={patient.id} className="hover:bg-gray-100 transition duration-200">
+                {currentPatients.map((patient, index) => (
+                  <tr key={`${patient.id}-${index}`} className="hover:bg-gray-100 transition duration-200">
                     <td className="py-2 px-4 border-b">{patient.name}</td>
                     <td className="py-2 px-4 border-b">{patient.email}</td>
                     <td className="py-2 px-4 border-b">{patient.phone}</td>
@@ -204,9 +201,7 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
                         className={`inline-block text-xs font-medium px-3 py-1 rounded-full ${
                           patient.status === "Assigned"
                             ? "bg-green-100 text-green-600"
-                            : patient.status === "Pending"
-                            ? "bg-red-100 text-red-600"
-                            : "bg-gray-100 text-gray-600"
+                            : "bg-red-100 text-red-600"
                         }`}
                       >
                         {patient.status}
@@ -234,60 +229,64 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
+            className="text-gray-500 hover:text-gray-700"
           >
             <FaChevronLeft />
           </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
+          <span className="text-gray-600">Page {currentPage} of {totalPages}</span>
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
+            className="text-gray-500 hover:text-gray-700"
           >
             <FaChevronRight />
           </button>
         </div>
       </div>
 
-      {/* Modals */}
+      {/* Patient Modal */}
       <CustomModal isOpen={isPatientModalOpen} onClose={closePatientModal}>
         {selectedPatient && (
           <div>
-            <h3 className="text-xl font-semibold">{selectedPatient.name}</h3>
-            <p className="mt-2">Email: {selectedPatient.email}</p>
-            <p className="mt-2">Phone: {selectedPatient.phone}</p>
-            <p className="mt-2">Details: {selectedPatient.details}</p>
-            <p className="mt-2">Status: {selectedPatient.status}</p>
-
-            {selectedPatient.status === "Pending" && (
+            <h2 className="text-xl font-semibold mb-3">{selectedPatient.name}</h2>
+            <p><strong>Email:</strong> {selectedPatient.email}</p>
+            <p><strong>Phone:</strong> {selectedPatient.phone}</p>
+            <p><strong>Details:</strong> {selectedPatient.details}</p>
+            {selectedPatient.status === "Pending" ? (
               <button
                 onClick={openVolunteerModal}
-                className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
               >
                 Assign Volunteers
+              </button>
+            ) : (
+              <button
+                onClick={openVolunteerModal}
+                className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+              >
+                View Volunteers
               </button>
             )}
           </div>
         )}
       </CustomModal>
 
+      {/* Volunteer Modal */}
       <CustomModal isOpen={isVolunteerModalOpen} onClose={closeVolunteerModal}>
-        <h3 className="text-xl font-semibold">Select Verified Volunteers</h3>
-        <div className="mt-4">
-          {volunteers.map((volunteer) => (
-            <div key={volunteer.id} className="flex items-center justify-between py-2">
-              <span>{volunteer.name} ({volunteer.email})</span>
-              <button
-                onClick={() => assignVolunteerToPatient(volunteer)}
-                className="bg-green-500 text-white px-3 py-1 rounded"
-              >
-                Assign
-              </button>
-            </div>
+        <h2 className="text-xl font-semibold mb-4">Assign Volunteer</h2>
+        <ul>
+          {volunteers.map((volunteer, index) => (
+            <li
+              key={`${volunteer.id}-${index}`}
+              className="flex justify-between items-center border p-3 rounded-md hover:bg-gray-100 transition cursor-pointer"
+              onClick={() => assignVolunteerToPatient(volunteer)}
+            >
+              <span>
+                {volunteer.name} - {volunteer.email} ({volunteer.location})
+              </span>
+            </li>
           ))}
-        </div>
+        </ul>
       </CustomModal>
     </div>
   );

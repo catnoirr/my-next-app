@@ -12,12 +12,14 @@ interface Patient {
   phone: string;
   details: string;
   status?: string;
+  assignedVolunteers?: string[]; // Add assignedVolunteers field
 }
 
 interface Volunteer {
   id: string;
   name: string;
   email: string;
+  verified: boolean; // Add verified property
 }
 
 interface PatientsProps {
@@ -44,7 +46,7 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
           ...doc.data(),
         })) as Patient[];
 
-        setPatients(patientData); // Remove duplicate filtering
+        setPatients(patientData);
       },
       (error) => {
         console.error("Error fetching patients:", error);
@@ -60,7 +62,9 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
           ...doc.data(),
         })) as Volunteer[];
 
-        setVolunteers(volunteerData);
+        // Filter to get only verified volunteers
+        const verifiedVolunteers = volunteerData.filter(volunteer => volunteer.verified);
+        setVolunteers(verifiedVolunteers);
       },
       (error) => {
         console.error("Error fetching volunteers:", error);
@@ -95,11 +99,14 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
     if (selectedPatient) {
       try {
         const patientRef = doc(db, "requests", selectedPatient.id);
-        await updateDoc(patientRef, { status: "Assigned", assignedVolunteer: volunteer.name });
+        await updateDoc(patientRef, {
+          status: "Assigned",
+          assignedVolunteers: [...(selectedPatient.assignedVolunteers || []), volunteer.id], // Save volunteer UID
+        });
 
         setPatients((prevPatients) =>
           prevPatients.map((p) =>
-            p.id === selectedPatient.id ? { ...p, status: "Assigned" } : p
+            p.id === selectedPatient.id ? { ...p, status: "Assigned", assignedVolunteers: [...(p.assignedVolunteers || []), volunteer.id] } : p
           )
         );
         closeVolunteerModal();
@@ -223,55 +230,65 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-between items-center mt-6">
-          <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
-            <FaChevronLeft className="text-gray-500 hover:text-gray-700" />
+        <div className="flex justify-between mt-4">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
+          >
+            <FaChevronLeft />
           </button>
-          <span className="text-gray-700">
+          <span>
             Page {currentPage} of {totalPages}
           </span>
-          <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
-            <FaChevronRight className="text-gray-500 hover:text-gray-700" />
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
+          >
+            <FaChevronRight />
           </button>
         </div>
       </div>
 
-      {/* Patient details modal */}
-      {isPatientModalOpen && selectedPatient && (
-        <CustomModal isOpen={isPatientModalOpen} onClose={closePatientModal} title="Patient Details">
+      {/* Modals */}
+      <CustomModal isOpen={isPatientModalOpen} onClose={closePatientModal}>
+        {selectedPatient && (
           <div>
-            <h2 className="text-lg font-semibold">{selectedPatient.name}</h2>
-            <p>Email: {selectedPatient.email}</p>
-            <p>Phone: {selectedPatient.phone}</p>
-            <p>Details: {selectedPatient.details}</p>
-            <p>Status: {selectedPatient.status}</p>
-            <button onClick={openVolunteerModal} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
-              Assign Volunteer
-            </button>
-          </div>
-        </CustomModal>
-      )}
+            <h3 className="text-xl font-semibold">{selectedPatient.name}</h3>
+            <p className="mt-2">Email: {selectedPatient.email}</p>
+            <p className="mt-2">Phone: {selectedPatient.phone}</p>
+            <p className="mt-2">Details: {selectedPatient.details}</p>
+            <p className="mt-2">Status: {selectedPatient.status}</p>
 
-      {/* Volunteer selection modal */}
-      {isVolunteerModalOpen && (
-        <CustomModal isOpen={isVolunteerModalOpen} onClose={closeVolunteerModal} >
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Select a Volunteer</h2>
-            <ul>
-              {volunteers.map((volunteer) => (
-                <li key={volunteer.id}>
-                  <button
-                    onClick={() => assignVolunteerToPatient(volunteer)}
-                    className="w-full text-left py-2 px-4 hover:bg-gray-100"
-                  >
-                    {volunteer.name}
-                  </button>
-                </li>
-              ))}
-            </ul>
+            {selectedPatient.status === "Pending" && (
+              <button
+                onClick={openVolunteerModal}
+                className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+              >
+                Assign Volunteers
+              </button>
+            )}
           </div>
-        </CustomModal>
-      )}
+        )}
+      </CustomModal>
+
+      <CustomModal isOpen={isVolunteerModalOpen} onClose={closeVolunteerModal}>
+        <h3 className="text-xl font-semibold">Select Verified Volunteers</h3>
+        <div className="mt-4">
+          {volunteers.map((volunteer) => (
+            <div key={volunteer.id} className="flex items-center justify-between py-2">
+              <span>{volunteer.name} ({volunteer.email})</span>
+              <button
+                onClick={() => assignVolunteerToPatient(volunteer)}
+                className="bg-green-500 text-white px-3 py-1 rounded"
+              >
+                Assign
+              </button>
+            </div>
+          ))}
+        </div>
+      </CustomModal>
     </div>
   );
 };

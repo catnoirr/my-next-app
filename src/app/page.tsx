@@ -9,7 +9,7 @@ import { FaSpinner } from 'react-icons/fa'; // Import spinner icon
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true); // State to track loading status
-  const router = useRouter();
+  const router = useRouter();  
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {

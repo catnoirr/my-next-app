@@ -3,7 +3,7 @@ import React from "react";
 interface CustomModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title?: string; // Add title here, making it optional if needed
+  title?: string;
   children: React.ReactNode;
 }
 
@@ -19,7 +19,7 @@ const CustomModal: React.FC<CustomModalProps> = ({ isOpen, onClose, title, child
       ></div>
 
       {/* Modal content */}
-      <div className="relative bg-white p-6 rounded-lg shadow-2xl w-full max-w-lg md:max-w-2xl z-10 transform transition-transform duration-300 ease-out scale-90 opacity-0 animate-modal-open">
+      <div className="relative bg-white p-6 rounded-lg shadow-2xl w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl z-10 transform transition-transform duration-300 ease-out scale-90 opacity-0 animate-modal-open mx-4">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-2xl rounded-full p-1 transition duration-200"
@@ -30,7 +30,7 @@ const CustomModal: React.FC<CustomModalProps> = ({ isOpen, onClose, title, child
 
         {/* Title */}
         {title && (
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">
+          <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4 border-b pb-2">
             {title}
           </h2>
         )}

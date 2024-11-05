@@ -255,49 +255,59 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter }) => {
       </div>
 
       {/* Patient Modal */}
-      {selectedPatient && (
-        <CustomModal isOpen={isPatientModalOpen} onClose={closePatientModal}>
-          <h3 className="text-xl font-bold mb-4">Patient Details</h3>
-          <p><strong>Name:</strong> {selectedPatient.name}</p>
-          <p><strong>Email:</strong> {selectedPatient.email}</p>
-          <p><strong>Phone:</strong> {selectedPatient.phone}</p>
-          <p><strong>Status:</strong> {selectedPatient.status}</p>
-          <div className="mt-4">
-            {selectedPatient.status === "Pending" ? (
-              <button onClick={openVolunteerModal} className="bg-blue-500 text-white px-4 py-2 rounded">
-                Assign Volunteers
-              </button>
-            ) : (
-              <button onClick={openVolunteerModal} className="bg-blue-500 text-white px-4 py-2 rounded">
-                View Volunteers
-              </button>
-            )}
-          </div>
-        </CustomModal>
+     {/* Patient Modal */}
+{selectedPatient && (
+  <CustomModal isOpen={isPatientModalOpen} onClose={closePatientModal} title="Patient Details">
+    {/* <h3 className="text-xl font-bold mb-4">Patient Details</h3> */}
+    <p><strong>Name:</strong> {selectedPatient.name}</p>
+    {/* <p><strong>Email:</strong> {selectedPatient.email}</p>
+    <p><strong>Phone:</strong> {selectedPatient.phone}</p>
+    <p><strong>Status:</strong> {selectedPatient.status}</p> */}
+    <p><strong>Request:</strong> {selectedPatient.details}</p>
+    <div className="mt-4">
+      {selectedPatient.status === "Pending" ? (
+        <button onClick={openVolunteerModal} className="bg-blue-500 text-white px-4 py-2 rounded">
+          Assign Volunteers
+        </button>
+      ) : (
+        <button onClick={openVolunteerModal} className="bg-blue-500 text-white px-4 py-2 rounded">
+          View Volunteers
+        </button>
       )}
+    </div>
+  </CustomModal>
+)}
+
 
       {/* Volunteer Modal */}
       {isVolunteerModalOpen && (
-        <CustomModal isOpen={isVolunteerModalOpen} onClose={closeVolunteerModal}>
-          <h3 className="text-xl font-bold mb-4">{selectedPatient?.status === "Pending" ? "Assign Volunteers" : "Assigned Volunteers"}</h3>
-          <ul className="space-y-3">
-            {(selectedPatient?.status === "Pending" ? volunteers : volunteers.filter(v => selectedPatient?.assignedVolunteers?.includes(v.id)))
-              .map((volunteer) => (
-                <li key={volunteer.id} className="flex justify-between items-center border p-2 rounded">
-                  <span>{volunteer.name} ({volunteer.location})</span>
-                  {selectedPatient?.status === "Pending" && (
-                    <button
-                      onClick={() => assignVolunteerToPatient(volunteer)}
-                      className="bg-green-500 text-white px-2 rounded"
-                    >
-                      Assign
-                    </button>
-                  )}
-                </li>
-            ))}
-          </ul>
-        </CustomModal>
-      )}
+  <CustomModal
+    isOpen={isVolunteerModalOpen}
+    onClose={closeVolunteerModal}
+    title={selectedPatient?.status === "Pending" ? "Assign Volunteers" : "Assigned Volunteers"}
+  >
+    <ul className="space-y-3">
+      {(selectedPatient?.status === "Pending"
+        ? volunteers
+        : volunteers.filter(v => selectedPatient?.assignedVolunteers?.includes(v.id))
+      ).map((volunteer) => (
+        <li key={volunteer.id} className="flex flex-col border p-2 rounded">
+          <span><strong>Name:</strong> {volunteer.name}</span>
+          <span><strong>Email:</strong> {volunteer.email}</span>
+          <span><strong>Location:</strong> {volunteer.location || "N/A"}</span>
+          {selectedPatient?.status === "Pending" && (
+            <button
+              onClick={() => assignVolunteerToPatient(volunteer)}
+              className="bg-green-500 text-white px-2 rounded mt-2 self-start"
+            >
+              Assign
+            </button>
+          )}
+        </li>
+      ))}
+    </ul>
+  </CustomModal>
+)}
     </div>
   );
 };

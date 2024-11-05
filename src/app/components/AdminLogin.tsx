@@ -1,12 +1,13 @@
 // src/app/components/AdminLogin.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { auth } from '../firebaseConfig';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie'; // Import js-cookie for setting cookies
 import { getFirestore, doc, getDoc } from 'firebase/firestore'; // Firestore functions
+import { FirebaseError } from 'firebase/app'; // Import FirebaseError for error handling
 
 const db = getFirestore(); // Initialize Firestore
 
@@ -43,8 +44,10 @@ export default function AdminLogin() {
         auth.signOut(); // Sign out the user if not an admin
         setLoading(false);
       }
-    } catch (err: any) {
-      setError('Invalid email or password. Please try again.');
+    } catch (err) {
+      // Here, 'err' is used for logging or displaying the error message
+      const firebaseError = err as FirebaseError; // Cast to FirebaseError
+      setError(firebaseError.message || 'Invalid email or password. Please try again.'); // Use firebase error message
       setLoading(false);
     }
   };
@@ -130,8 +133,9 @@ function ForgotPasswordForm({ onClose }: { onClose: () => void }) {
       await sendPasswordResetEmail(auth, email);
       setVerificationSent(true);
       setMessage('Password reset email sent! Check your inbox.');
-    } catch (err: any) {
-      setError('Failed to send reset email. Try again.');
+    } catch (err) {
+      const firebaseError = err as FirebaseError; // Cast to FirebaseError
+      setError(firebaseError.message || 'Failed to send reset email. Try again.');
     }
   };
 
@@ -181,5 +185,3 @@ function ForgotPasswordForm({ onClose }: { onClose: () => void }) {
     </div>
   );
 }
-
-// styles.css (global CSS file or inside a style tag if using Tailwind's custom styles)

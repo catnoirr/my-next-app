@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebaseConfig'; 
 import { collection, getDocs, query } from 'firebase/firestore';
@@ -11,11 +11,17 @@ interface Volunteer {
   email: string;
 }
 
+interface Message {
+  id: string;
+  name: string; // Name of the sender
+  details: string; // Content of the message
+}
+
 const Chat: React.FC = () => {
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
   const [filteredVolunteers, setFilteredVolunteers] = useState<Volunteer[]>([]);
   const [selectedUser, setSelectedUser] = useState<Volunteer | null>(null);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]); // Updated to Message[]
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -47,7 +53,7 @@ const Chat: React.FC = () => {
     const messagesData = messagesSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
-    }));
+    })) as Message[]; // Ensure the fetched messages conform to the Message type
     setMessages(messagesData);
   };
 
@@ -70,7 +76,6 @@ const Chat: React.FC = () => {
 
   return (
     <div className="flex flex-col md:flex-row bg-gray-100 w-full gap-6 h-screen">
-      
       <div className='md:ml-5'><Sidebar/></div>
 
       <div className="flex-1 p-6 bg-white shadow-lg rounded-lg mt-3 md:m-5 m-3 mb-4">

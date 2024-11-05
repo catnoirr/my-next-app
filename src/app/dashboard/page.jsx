@@ -1,11 +1,9 @@
 // src/dashboard/page.jsx
 "use client";
 
-import { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import HeroSection from "../components/HeroSection";
 import ActiveProjects from "../components/ActiveProjects";
-import { FaSignOutAlt } from "react-icons/fa"; // Import the logout icon
 
 export default function DashboardPage() {
   return (

@@ -1,4 +1,3 @@
-import { FaBell, FaSearch, FaUserCircle } from "react-icons/fa";
 
 const HeroSection: React.FC = () => {
   return (

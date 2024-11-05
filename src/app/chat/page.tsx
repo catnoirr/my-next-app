@@ -1,6 +1,5 @@
 import React from 'react';
 import Chat from '../components/Chat'; // Adjust the import path as necessary
-import Sidebar from '../components/Sidebar'; // If you also want to include the sidebar here
 
 const Page: React.FC = () => {
   return (

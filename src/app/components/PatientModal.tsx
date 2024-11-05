@@ -2,19 +2,30 @@ import React, { useEffect, useState } from 'react';
 import { collection, onSnapshot, QueryDocumentSnapshot, doc, updateDoc, getDoc, addDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
+interface Volunteer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  verified: boolean; // Assuming this field exists in your data model
+  status?: string;
+}
+
+interface Patient {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  details: string;
+  status?: string;
+  address: string;
+  assignedVolunteers?: string[]; // Array of assigned volunteer IDs
+}
+
 type PatientModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  patient: {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    details: string;
-    status?: string;
-    address: string;
-    assignedVolunteers?: string[]; // Array of assigned volunteer IDs
-  } | null;
+  patient: Patient | null;
   onUpdateStatus: (newStatus: string) => void;
 };
 
@@ -24,7 +35,7 @@ const PatientModal: React.FC<PatientModalProps> = ({
   patient,
   onUpdateStatus,
 }) => {
-  const [allVolunteers, setAllVolunteers] = useState<any[]>([]);
+  const [allVolunteers, setAllVolunteers] = useState<Volunteer[]>([]);
   const [showVolunteerList, setShowVolunteerList] = useState(false);
 
   useEffect(() => {
@@ -32,7 +43,7 @@ const PatientModal: React.FC<PatientModalProps> = ({
       const volunteersData = snapshot.docs.map((doc: QueryDocumentSnapshot) => ({
         id: doc.id,
         ...doc.data(),
-      })) as any[];
+      })) as Volunteer[]; // Cast to Volunteer[]
       setAllVolunteers(volunteersData.filter(volunteer => volunteer.verified)); // Filter only verified volunteers
     });
 
@@ -178,7 +189,8 @@ const PatientModal: React.FC<PatientModalProps> = ({
           </div>
         )}
       </div>
-    </div> );
+    </div>
+  );
 };
 
 export default PatientModal;

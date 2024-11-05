@@ -11,7 +11,7 @@ import { useAuthState } from 'react-firebase-hooks/auth'; // Import the hook
 
 export default function Sidebar() {
   const router = useRouter();
-  const [user, loading, error] = useAuthState(auth); // Get the auth state
+  const [user, loading] = useAuthState(auth); // Get the auth state
 
   useEffect(() => {
     // If the user is not authenticated, redirect to login

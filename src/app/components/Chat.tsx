@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebaseConfig'; 
-import { collection, getDocs, query } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import Sidebar from '../components/Sidebar';
 import Modal from './Modal'; // Import your Modal component here
 
@@ -21,7 +21,7 @@ const Chat: React.FC = () => {
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
   const [filteredVolunteers, setFilteredVolunteers] = useState<Volunteer[]>([]);
   const [selectedUser, setSelectedUser] = useState<Volunteer | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]); // Updated to Message[]
+  const [messages, setMessages] = useState<Message[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -43,17 +43,17 @@ const Chat: React.FC = () => {
   const handleSelectUser = (user: Volunteer) => {
     setSelectedUser(user);
     setShowModal(false);
-    fetchMessages(user.id);
+    fetchMessages(user.id); // Fetch messages for the selected user
   };
 
   const fetchMessages = async (userId: string) => {
     const messagesCollection = collection(db, 'messages');
-    const messagesQuery = query(messagesCollection);
+    const messagesQuery = query(messagesCollection, where("volunteerId", "==", userId)); // Filter messages by userId
     const messagesSnapshot = await getDocs(messagesQuery);
     const messagesData = messagesSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
-    })) as Message[]; // Ensure the fetched messages conform to the Message type
+    })) as Message[];
     setMessages(messagesData);
   };
 

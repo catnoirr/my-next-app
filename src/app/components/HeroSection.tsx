@@ -105,7 +105,7 @@ const HeroSection: React.FC = () => {
           <p className="text-gray-500">{completedCount} Completed</p>
         </div>
         <div className="bg-white shadow-md rounded-lg p-6 text-center transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg">
-          <h2 className="text-xl font-semibold text-gray-800">New Volunteers</h2>
+          <h2 className="text-xl font-semibold text-gray-800">Total Volunteers</h2>
           <p className="text-3xl font-bold text-gray-900">{newVolunteersCount}</p>
           <p className="text-green-500">{unverifiedVolunteersCount} New</p>
         </div>

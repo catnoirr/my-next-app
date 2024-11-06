@@ -9,6 +9,9 @@ import VolunteerRequest from "./VolunteerRequest";
 interface Patient {
   id: string;
   name: string;
+  email: string;
+  phone: string;
+  location: string;
   status: string;
   details: string;
   assignedVolunteer?: string;
@@ -19,6 +22,7 @@ interface Volunteer {
   name: string;
   email: string;
   phone: string; // Added phone field
+  location: string;
 }
 
 const ActiveProjects: React.FC = () => {
@@ -174,6 +178,8 @@ const ActiveProjects: React.FC = () => {
                   <div>
                     <p className="font-medium text-gray-800">{volunteer.name}</p>
                     <p className="text-sm text-gray-600">{volunteer.email}</p>
+                    <p className="text-sm text-gray-600">{volunteer.phone}</p>
+                    <p className="text-sm text-gray-600">{volunteer.location}</p>
                   </div>
                   <button
                     onClick={() => assignVolunteer(volunteer.id, volunteer.name)}
@@ -196,6 +202,7 @@ const ActiveProjects: React.FC = () => {
             <p className="text-gray-600">Name: {assignedVolunteerDetails.name}</p>
             <p className="text-gray-600">Email: {assignedVolunteerDetails.email}</p>
             <p className="text-gray-600">Phone: {assignedVolunteerDetails.phone}</p>
+            <p className="text-gray-600">Location: {assignedVolunteerDetails.location}</p>
           </div>
         )}
       </CustomModal>

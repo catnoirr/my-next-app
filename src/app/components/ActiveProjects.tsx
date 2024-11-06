@@ -219,7 +219,7 @@ export default function ActiveProjects() {
   return (
     <div>
       <main className="flex flex-col gap-7">
-        <AllNewPatients searchTerm="" filter="Pending" />
+        <AllNewPatients searchTerm="" filter="All" />
        
     <div>
          <VolunteerRequest />

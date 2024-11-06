@@ -62,7 +62,7 @@ export default function VolunteerRequest() {
     }, []);
 
     return (
-        <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg p-6 border">
+        <div className=" mx-auto bg-white shadow-lg rounded-lg p-6 border">
             <h2 className="text-xl font-semibold text-gray-700 mb-6">Volunteer Requests</h2>
             <div className="">
                 {volunteers.filter(volunteer => !volunteer.verified).length === 0 ? ( // Check for no unverified volunteers

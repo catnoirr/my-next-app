@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { collection, onSnapshot, QueryDocumentSnapshot, doc, updateDoc } from "firebase/firestore";
-import { FaEye, FaComments, FaThList, FaTh, FaChevronLeft, FaChevronRight ,FaHandPaper } from "react-icons/fa";
+import { collection, onSnapshot, QueryDocumentSnapshot, doc, updateDoc ,deleteDoc } from "firebase/firestore";
+import { FaEye, FaComments, FaThList, FaTh, FaChevronLeft, FaChevronRight ,FaHandPaper, FaTrash  } from "react-icons/fa";
 import { db } from "../firebaseConfig";
 import CustomModal from "./CustomModal";
 
@@ -29,6 +29,8 @@ interface PatientsProps {
   filter: string;
 }
 
+
+
 const Patients: React.FC<PatientsProps> = ({ searchTerm, filter}) => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
@@ -38,6 +40,21 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isGridView, setIsGridView] = useState(true);
   const patientsPerPage = 8;
+
+  const deletePatient = async (patientId: string) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this request?");
+    if (confirmDelete) {
+      try {
+        // Delete the patient document from Firestore
+        await deleteDoc(doc(db, "requests", patientId));
+        
+        // Update the local state to remove the deleted patient
+        setPatients(prevPatients => prevPatients.filter(patient => patient.id !== patientId));
+      } catch (error) {
+        console.error("Error deleting patient:", error);
+      }
+    }
+  };
 
   useEffect(() => {
     const unsubscribePatients = onSnapshot(
@@ -158,6 +175,7 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter}) => {
 </div>
 
 
+
         {/* Patient cards or table view */}
         <div className="overflow-auto">
   {isGridView ? (
@@ -188,12 +206,12 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter}) => {
               </span>
             )}
             <div className="flex justify-end mt-4 space-x-3">
-              <button onClick={() => openPatientModal(patient)} title="View Details">
-                <FaEye className="text-gray-500 hover:text-gray-700" />
-              </button>
-              <button title="Send Message">
-                <FaComments className="text-blue-500 hover:text-blue-700" />
-              </button>
+            <button onClick={() => openPatientModal(patient)} title="View Details">
+    <FaEye className="text-gray-500 hover:text-gray-700" />
+  </button>
+  <button onClick={() => deletePatient(patient.id)} title="Delete Request">
+    <FaTrash className="text-red-500 hover:text-red-700" />
+  </button>
             </div>
           </div>
         ))}
@@ -229,12 +247,12 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter}) => {
                     </td>
                     <td className="py-2 px-4 border-b">
                       <div className="flex space-x-2">
-                        <button onClick={() => openPatientModal(patient)} title="View Details">
-                          <FaEye className="text-gray-500 hover:text-gray-700" />
-                        </button>
-                        <button title="Send Message">
-                          <FaComments className="text-blue-500 hover:text-blue-700" />
-                        </button>
+                      <button onClick={() => openPatientModal(patient)} title="View Details">
+      <FaEye className="text-gray-500 hover:text-gray-700" />
+    </button>
+    <button onClick={() => deletePatient(patient.id)} title="Delete Request">
+      <FaTrash className="text-red-500 hover:text-red-700" />
+    </button>
                       </div>
                     </td>
                   </tr>

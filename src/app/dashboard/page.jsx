@@ -3,7 +3,7 @@
 
 import Sidebar from '../components/Sidebar';
 import HeroSection from "../components/HeroSection";
-import ActiveProjects from "../components/ActiveProjects";
+import Patients from "../components/ActiveProjects";
 
 export default function DashboardPage() {
   return (
@@ -26,7 +26,7 @@ export default function DashboardPage() {
           
         </div>
         <HeroSection />
-        <ActiveProjects />
+        <Patients />
       </main>
     </div>
   );

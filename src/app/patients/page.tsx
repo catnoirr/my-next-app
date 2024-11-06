@@ -17,7 +17,7 @@ const ALLPatients = () => {
 
       {/* Main Content */}
       <main className="flex-1 p-4 rounded-2xl shadow-md">
-        <h1 className="text-3xl font-bold mb-4">Patients</h1>
+        <h1 className="text-3xl font-bold mb-4">Users</h1>
 
         {/* Search Bar */}
         <input

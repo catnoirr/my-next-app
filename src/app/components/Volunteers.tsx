@@ -67,7 +67,7 @@ const Volunteers: React.FC<VolunteersProps> = ({ searchTerm, filter }) => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen mt-6 rounded-2xl">
+    <div className="p-6 bg-gray-100  mt-6 rounded-2xl">
       {/* Toggle View Icons */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-semibold text-gray-800">Volunteers</h2>
@@ -94,7 +94,7 @@ const Volunteers: React.FC<VolunteersProps> = ({ searchTerm, filter }) => {
         {currentVolunteers.map((volunteer) => (
           <div 
             key={volunteer.id} 
-            className={`bg-white shadow-md rounded-lg p-5 border ${isGridView ? 'flex flex-col items-start' : 'flex justify-between items-center'} relative transition-transform hover:scale-105`}
+            className={`bg-white shadow-md rounded-lg p-5 border ${isGridView ? 'flex flex-col items-start' : 'flex sm:justify-between items-center'} relative transition-transform hover:scale-105`}
           >
             <div className="flex items-center space-x-3">
               <FaUser className="text-gray-500" size={24} />

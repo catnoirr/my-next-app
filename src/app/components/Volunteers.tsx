@@ -20,6 +20,7 @@ const Volunteers: React.FC<VolunteersProps> = ({ searchTerm, filter }) => {
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
   const [isGridView, setIsGridView] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [volunteerToDelete, setVolunteerToDelete] = useState<string | null>(null);
   const volunteersPerPage = 9;
 
   useEffect(() => {
@@ -45,9 +46,16 @@ const Volunteers: React.FC<VolunteersProps> = ({ searchTerm, filter }) => {
     await updateDoc(volunteerRef, { verified: true });
   };
 
-  const handleDelete = async (volunteerId: string) => {
-    const volunteerRef = doc(db, 'volunteers', volunteerId);
-    await deleteDoc(volunteerRef);
+  const confirmDelete = (volunteerId: string) => {
+    setVolunteerToDelete(volunteerId);
+  };
+
+  const handleDelete = async () => {
+    if (volunteerToDelete) {
+      const volunteerRef = doc(db, 'volunteers', volunteerToDelete);
+      await deleteDoc(volunteerRef);
+      setVolunteerToDelete(null); // Reset after deletion
+    }
   };
 
   const filteredVolunteers = volunteers
@@ -67,7 +75,7 @@ const Volunteers: React.FC<VolunteersProps> = ({ searchTerm, filter }) => {
   };
 
   return (
-    <div className="p-6 bg-gray-100  mt-6 rounded-2xl">
+    <div className="p-6 bg-gray-100 mt-6 rounded-2xl">
       {/* Toggle View Icons */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-semibold text-gray-800">Volunteers</h2>
@@ -135,7 +143,7 @@ const Volunteers: React.FC<VolunteersProps> = ({ searchTerm, filter }) => {
                   </button>
                 )}
                 <button
-                  onClick={() => handleDelete(volunteer.id)}
+                  onClick={() => confirmDelete(volunteer.id)}
                   aria-label="Remove Volunteer"
                   className="text-red-500 hover:text-red-700 transition"
                 >
@@ -162,6 +170,29 @@ const Volunteers: React.FC<VolunteersProps> = ({ searchTerm, filter }) => {
 
       {filteredVolunteers.length === 0 && (
         <p className="text-center text-gray-500 mt-8">No volunteers found matching your criteria.</p>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {volunteerToDelete && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 w-80 text-center">
+            <p className="text-lg font-semibold mb-4">Are you sure you want to delete this volunteer?</p>
+            <div className="flex justify-between">
+              <button
+                onClick={handleDelete}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={() => setVolunteerToDelete(null)}
+                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

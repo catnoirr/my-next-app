@@ -1,13 +1,13 @@
-"use client";
 import React, { useEffect, useState } from "react";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
-import { db } from "../firebaseConfig"; // Ensure this is the correct import for your Firestore config
+import { db } from "../firebaseConfig";
 
 const HeroSection: React.FC = () => {
   const [newRequestsCount, setNewRequestsCount] = useState<number>(0);
   const [assignedActiveCount, setAssignedActiveCount] = useState<number>(0);
   const [completedCount, setCompletedCount] = useState<number>(0);
-  const [newVolunteersCount, setNewVolunteersCount ,] = useState<number>(0);
+  const [newVolunteersCount, setNewVolunteersCount] = useState<number>(0);
+  const [unverifiedVolunteersCount, setUnverifiedVolunteersCount] = useState<number>(0); // New state
 
   useEffect(() => {
     // Fetch the count of Pending requests
@@ -37,34 +37,43 @@ const HeroSection: React.FC = () => {
       return unsubscribe;
     };
 
-    // Fetch the count of new volunteers
+    // Fetch the count of new volunteers with role "volunteer"
     const fetchNewVolunteers = () => {
-      const q = query(collection(db, "volunteers"), where("role", "==", "volunteer")); // Assuming 'status' tracks if the volunteer is new
+      const q = query(collection(db, "volunteers"), where("role", "==", "volunteer"));
       const unsubscribe = onSnapshot(q, (snapshot) => {
         setNewVolunteersCount(snapshot.size);
       });
       return unsubscribe;
     };
-    
+
+    // Fetch the count of unverified volunteers
+    const fetchUnverifiedVolunteers = () => {
+      const q = query(collection(db, "volunteers"), where("verified", "==", false));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        setUnverifiedVolunteersCount(snapshot.size);
+      });
+      return unsubscribe;
+    };
 
     // Call all the functions to fetch data
     const unsubscribeNewRequests = fetchNewRequests();
     const unsubscribeAssignedActive = fetchAssignedActive();
     const unsubscribeCompleted = fetchCompleted();
     const unsubscribeNewVolunteers = fetchNewVolunteers();
+    const unsubscribeUnverifiedVolunteers = fetchUnverifiedVolunteers(); // New fetch
 
     // Cleanup function to unsubscribe from snapshots when the component is unmounted
     return () => {
-      unsubscribeNewRequests();  // Call the unsubscribe function
-      unsubscribeAssignedActive();  // Call the unsubscribe function
-      unsubscribeCompleted();  // Call the unsubscribe function
-      unsubscribeNewVolunteers();  // Call the unsubscribe function
+      unsubscribeNewRequests();
+      unsubscribeAssignedActive();
+      unsubscribeCompleted();
+      unsubscribeNewVolunteers();
+      unsubscribeUnverifiedVolunteers(); // New unsubscribe
     };
   }, []);
 
   return (
     <div className="bg-white -mb-20">
-      {/* Navbar */}
       <header className="flex justify-between items-center px-8 py-4 border-b border-gray-200">
         <div className="flex items-center space-x-4">
           <div className="relative">
@@ -98,8 +107,9 @@ const HeroSection: React.FC = () => {
         <div className="bg-white shadow-md rounded-lg p-6 text-center transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg">
           <h2 className="text-xl font-semibold text-gray-800">New Volunteers</h2>
           <p className="text-3xl font-bold text-gray-900">{newVolunteersCount}</p>
-          <p className="text-green-500">{newVolunteersCount} New</p>
+          <p className="text-green-500">{unverifiedVolunteersCount} New</p>
         </div>
+       
       </div>
     </div>
   );

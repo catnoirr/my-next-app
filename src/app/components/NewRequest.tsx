@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { collection, onSnapshot, QueryDocumentSnapshot, doc, updateDoc ,deleteDoc } from "firebase/firestore";
-import { FaEye, FaComments, FaThList, FaTh, FaChevronLeft, FaChevronRight ,FaHandPaper, FaTrash  } from "react-icons/fa";
+import { FaEye , FaThList, FaTh, FaChevronLeft, FaChevronRight ,FaHandPaper, FaTrash  } from "react-icons/fa";
 import { db } from "../firebaseConfig";
 import CustomModal from "./CustomModal";
 

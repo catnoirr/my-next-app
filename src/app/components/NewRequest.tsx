@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { collection, onSnapshot, QueryDocumentSnapshot, doc, updateDoc } from "firebase/firestore";
-import { FaEye, FaComments, FaThList, FaTh, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaEye, FaComments, FaThList, FaTh, FaChevronLeft, FaChevronRight ,FaHandPaper } from "react-icons/fa";
 import { db } from "../firebaseConfig";
 import CustomModal from "./CustomModal";
 
@@ -142,52 +142,64 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter}) => {
   return (
     <div className=" flex flex-col items-center mt-6 rounded-2xl">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-6xl p-6 border">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-700">{filter} Requests</h2>
-          <button
-            onClick={() => setIsGridView(!isGridView)}
-            className="text-gray-600 hover:text-gray-800 sm:flex items-center hidden"
-          >
-            {isGridView ? <FaThList /> : <FaTh />}
-            <span className="ml-2 text-sm">{isGridView ? "List View" : "Grid View"}</span>
-          </button>
-        </div>
+      <div className="flex justify-between items-center mb-6">
+  <h2 className="text-2xl font-semibold text-gray-700">Users Request</h2>
+
+  {/* Only show the List/Grid toggle if there are patients */}
+  {filteredPatients.length > 0 && (
+    <button
+      onClick={() => setIsGridView(!isGridView)}
+      className="text-gray-600 hover:text-gray-800 sm:flex items-center hidden"
+    >
+      {isGridView ? <FaThList /> : <FaTh />}
+      <span className="ml-2 text-sm">{isGridView ? "List View" : "Grid View"}</span>
+    </button>
+  )}
+</div>
+
 
         {/* Patient cards or table view */}
-        <div className=" overflow-auto">
-          {isGridView ? (
-            <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6 pt-0">
-              {currentPatients.map((patient, index) => (
-                <div
-                  key={`${patient.id}-${index}`}
-                  className="bg-white p-5 rounded-lg shadow-sm hover:shadow-md transition duration-200 border"
-                >
-                  <h3 className="text-lg font-semibold text-gray-800 mb-1">{patient.name}</h3>
-                  <p className="text-sm text-gray-600">Email: {patient.email}</p>
-                  <p className="text-sm text-gray-600">Phone: {patient.phone}</p>
-                  {patient.status && (
-                    <span
-                      className={`inline-block mt-3 text-xs font-medium px-3 py-1 rounded-full ${
-                        patient.status === "Assigned"
-                          ? "bg-green-100 text-green-600"
-                          : "bg-red-100 text-red-600"
-                      }`}
-                    >
-                      {patient.status}
-                    </span>
-                  )}
-                  <div className="flex justify-end mt-4 space-x-3">
-                    <button onClick={() => openPatientModal(patient)} title="View Details">
-                      <FaEye className="text-gray-500 hover:text-gray-700" />
-                    </button>
-                    <button title="Send Message">
-                      <FaComments className="text-blue-500 hover:text-blue-700" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+        <div className="overflow-auto">
+  {isGridView ? (
+    filteredPatients.length === 0 ? (
+      <div className="flex flex-col items-center justify-center mt-10 text-gray-500">
+        <FaHandPaper size={50} className="mb-4" />
+        <p className="text-lg font-semibold">No new requests</p>
+      </div>
+    ) : (
+      <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6 pt-0">
+        {currentPatients.map((patient, index) => (
+          <div
+            key={`${patient.id}-${index}`}
+            className="bg-white p-5 rounded-lg shadow-sm hover:shadow-md transition duration-200 border"
+          >
+            <h3 className="text-lg font-semibold text-gray-800 mb-1">{patient.name}</h3>
+            <p className="text-sm text-gray-600">Email: {patient.email}</p>
+            <p className="text-sm text-gray-600">Phone: {patient.phone}</p>
+            {patient.status && (
+              <span
+                className={`inline-block mt-3 text-xs font-medium px-3 py-1 rounded-full ${
+                  patient.status === "Assigned"
+                    ? "bg-green-100 text-green-600"
+                    : "bg-red-100 text-red-600"
+                }`}
+              >
+                {patient.status}
+              </span>
+            )}
+            <div className="flex justify-end mt-4 space-x-3">
+              <button onClick={() => openPatientModal(patient)} title="View Details">
+                <FaEye className="text-gray-500 hover:text-gray-700" />
+              </button>
+              <button title="Send Message">
+                <FaComments className="text-blue-500 hover:text-blue-700" />
+              </button>
             </div>
-          ) : (
+          </div>
+        ))}
+      </div>
+    )
+  ) : (
             <table className="min-w-full bg-white rounded-lg">
               <thead>
                 <tr>
@@ -234,24 +246,29 @@ const Patients: React.FC<PatientsProps> = ({ searchTerm, filter}) => {
 
         {/* Pagination Controls */}
         <div className="flex justify-between items-center mt-4">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <FaChevronLeft />
-          </button>
-          <div>
-            Page {currentPage} of {totalPages}
-          </div>
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <FaChevronRight />
-          </button>
-        </div>
+  {totalPages > 1 && (
+    <>
+      <button
+        onClick={() => handlePageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="text-gray-500 hover:text-gray-700"
+      >
+        <FaChevronLeft />
+      </button>
+      <div>
+        Page {currentPage} of {totalPages}
+      </div>
+      <button
+        onClick={() => handlePageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="text-gray-500 hover:text-gray-700"
+      >
+        <FaChevronRight />
+      </button>
+    </>
+  )}
+</div>
+
       </div>
 
       {/* Patient Modal */}
